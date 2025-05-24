@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: common-config
+  namespace: apps
+data:
+  LOKI_URL: "http://loki.infra.svc.cluster.local:3100/loki/api/v1/push"
+  MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "http://tempo.infra.svc.cluster.local:9411"
+  PRODUCT_SERVICE_URL: "http://product-service.apps.svc.cluster.local:8080"
+  ORDER_SERVICE_URL: "http://order-service.apps.svc.cluster.local:8081"
+  INVENTORY_SERVICE_URL: "http://inventory-service.apps.svc.cluster.local:8082"
