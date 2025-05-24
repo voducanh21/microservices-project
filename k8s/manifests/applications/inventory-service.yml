@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory-service
+  namespace: apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inventory-service
+  template:
+    metadata:
+      labels:
+        app: inventory-service
+    spec:
+      containers:
+        - name: inventory-service
+          ports:
+            - containerPort: 8080
+          image: ducanhvo/inventory-service:20250510005018
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: inventory-service-config
+                  key: SPRING_DATASOURCE_URL
+            - name: LOKI_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: common-config
+                  key: LOKI_URL
+            - name: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: common-config
+                  key: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: inventory-service
+  namespace: apps
+spec:
+  selector:
+    app: inventory-service
+  ports:
+    - protocol: TCP
+      port: 8082
+      targetPort: 8082
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: inventory-service-config
+  namespace: apps
+data:
+  SPRING_DATASOURCE_URL: "jdbc:mysql://mysql.infra.svc.cluster.local:3306/inventory_service"
