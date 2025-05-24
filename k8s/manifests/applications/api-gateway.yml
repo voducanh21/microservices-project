@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: ducanhvo/api-gateway:20250510005018
+          image: ducanhvo/api-gateway:20250524202924
           ports:
             - containerPort: 9000
           env:
