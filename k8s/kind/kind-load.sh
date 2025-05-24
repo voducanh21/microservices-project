@@ -10,11 +10,11 @@ docker pull grafana/loki:main
 docker pull prom/prometheus:v2.46.0
 docker pull grafana/tempo:2.2.2
 docker pull grafana/grafana:10.1.0
-docker pull saiupadhyayula007/new-api-gateway:latest
-docker pull saiupadhyayula007/new-product-service:latest
-docker pull saiupadhyayula007/new-order-service:latest
-docker pull saiupadhyayula007/new-inventory-service:latest
-docker pull saiupadhyayula007/new-notification-service:latest
+docker pull ducanhvo/api-gateway:latest
+docker pull ducanhvo/product-service:latest
+docker pull ducanhvo/order-service:latest
+docker pull ducanhvo/inventory-service:latest
+docker pull ducanhvo/notification-service:latest
 
 kind load docker-image -n microservices mongo:7.0.5
 kind load docker-image -n microservices mysql:8.3.0
@@ -28,8 +28,8 @@ kind load docker-image -n microservices grafana/loki:main
 kind load docker-image -n microservices prom/prometheus:v2.46.0
 kind load docker-image -n microservices grafana/tempo:2.2.2
 kind load docker-image -n microservices grafana/grafana:10.1.0
-kind load docker-image -n microservices saiupadhyayula007/new-api-gateway:latest
-kind load docker-image -n microservices saiupadhyayula007/new-product-service:latest
-kind load docker-image -n microservices saiupadhyayula007/new-order-service:latest
-kind load docker-image -n microservices saiupadhyayula007/new-inventory-service:latest
-kind load docker-image -n microservices saiupadhyayula007/new-notification-service:latest
+kind load docker-image -n microservices ducanhvo/api-gateway:latest
+kind load docker-image -n microservices ducanhvo/product-service:latest
+kind load docker-image -n microservices ducanhvo/order-service:latest
+kind load docker-image -n microservices ducanhvo/inventory-service:latest
+kind load docker-image -n microservices ducanhvo/notification-service:latest
