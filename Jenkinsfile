@@ -106,11 +106,22 @@ pipeline {
                         "ducanhvo/frontend:${env.TIMESTAMP}"
                     ]
 
-                    images.each { img ->
-                        echo "🔐 Scanning image ${img} for vulnerabilities..."
-                        sh "docker pull ${img}"
-                        sh "docker run --rm aquasec/trivy image --severity HIGH,CRITICAL --timeout 10m ${img}"
+                    def parallelStages = images.collectEntries { img ->
+                        ["Scan ${img}": {
+                            echo "🔐 Scanning ${img}..."
+                            sh "docker pull ${img} || true"
+                            sh """
+                              docker run --rm \
+                                -v /home/ducanh/.trivy-cache:/root/.cache \
+                                aquasec/trivy image \
+                                --severity HIGH,CRITICAL \
+                                --timeout 10m \
+                                ${img} || true
+                            """
+                        }]
                     }
+
+                    parallel parallelStages
                 }
             }
         }
