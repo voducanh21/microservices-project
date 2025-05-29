@@ -114,6 +114,7 @@ pipeline {
                               docker run --rm \
                                 -v /home/ducanh/.trivy-cache:/root/.cache \
                                 aquasec/trivy image \
+                                --skip-version-check \
                                 --severity HIGH,CRITICAL \
                                 --timeout 10m \
                                 ${img} || true
