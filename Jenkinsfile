@@ -121,9 +121,18 @@ pipeline {
                     sh """
                         git config user.name "Jenkins"
                         git config user.email "jenkins@localhost"
-                        git add k8s/manifests/applications/*.yml
-                        git commit -m "Update image tags to ${TIMESTAMP}" || echo "Nothing to commit"
-                        git push origin master
+
+                        # Stage YAML file nếu có thay đổi
+                        git add k8s/manifests/applications/*.yml || true
+
+                        # Kiểm tra xem có thực sự thay đổi không
+                        if ! git diff --cached --quiet; then
+                            echo "Committing YAML changes..."
+                            git commit -m "ci: update image tags to ${TIMESTAMP} [skip-ci]"
+                            git push origin master
+                        else
+                            echo "✅ No YAML changes to commit"
+                        fi
                     """
                 }
             }
