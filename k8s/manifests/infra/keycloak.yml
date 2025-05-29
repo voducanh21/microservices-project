@@ -22,10 +22,11 @@ spec:
             - "start-dev"                 # vẫn dùng chế độ dev
             - "--http-port=8080"
             - "--import-realm"
-            # ---- quan trọng ----
-            - "--hostname=http://keycloak.infra.svc.cluster.local:8080"
-            - "--hostname-strict=true"
-
+            - "--hostname-strict=false"
+            - "--hostname-strict-https=false"
+            - "--hostname=keycloak.voducanh.id.vn"
+            - "--proxy=edge"            
+# ---- quan trọng ----
           env:
             - name: DB_VENDOR
               valueFrom:
@@ -78,10 +79,14 @@ metadata:
 spec:
   selector:
     app: keycloak
+  type: ClusterIP
   ports:
-    - protocol: TCP
-      port: 8080
+    - name: http
+      port: 80
       targetPort: 8080
+    - name: https
+      port: 443
+      targetPort: 8443
 ---
 apiVersion: v1
 data:

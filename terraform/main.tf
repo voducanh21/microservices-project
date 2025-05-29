@@ -5,12 +5,10 @@ module "vpc" {
   name = "eks-vpc"
   cidr = "10.0.0.0/16"
 
-  azs             = ["ap-southeast-1a", "ap-southeast-1b"]
-  private_subnets = ["10.0.1.0/24", "10.0.2.0/24"]
-  public_subnets  = ["10.0.101.0/24", "10.0.102.0/24"]
-
-  enable_nat_gateway = true
-  single_nat_gateway = true
+  azs            = ["ap-southeast-1a", "ap-southeast-1b"]
+  public_subnets = ["10.0.101.0/24", "10.0.102.0/24"]
+  map_public_ip_on_launch = true
+  enable_nat_gateway = false  #  Tắt NAT gateway
 
   tags = {
     Terraform   = "true"
@@ -25,19 +23,19 @@ module "eks" {
   cluster_name    = var.cluster_name
   cluster_version = "1.29"
 
-  subnet_ids = module.vpc.private_subnets
+  subnet_ids = module.vpc.public_subnets  #  Dùng public subnet
   vpc_id     = module.vpc.vpc_id
 
   cluster_endpoint_public_access  = true
-  cluster_endpoint_private_access = true
+  cluster_endpoint_private_access = false  #  Không cần thiết nếu dùng public subnet
 
   eks_managed_node_groups = {
     default = {
       desired_size = 2
       max_size     = 3
-      min_size     = 1
+      min_size     = 2
 
-      instance_types = ["t3.medium"]
+      instance_types = ["t3.medium"]  #  Rẻ hơn
     }
   }
 
@@ -57,17 +55,11 @@ module "eks" {
     }
   }
 
-
   tags = {
     Terraform   = "true"
     Environment = "dev"
   }
 }
-
-# Đã comment vì không cần thiết nếu không dùng tới
-# data "aws_eks_cluster" "cluster" {
-#   name = module.eks.cluster_name
-# }
 
 data "aws_eks_cluster_auth" "token" {
   name = module.eks.cluster_name

@@ -63,26 +63,12 @@ metadata:
   namespace: infra
 ---
 apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: mysql-pv
-  namespace: infra
-spec:
-  storageClassName: 'standard'
-  accessModes:
-    - ReadWriteOnce
-  capacity:
-    storage: 1Gi
-  hostPath:
-    path: /data/mysql
----
-apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mysql-pvc
   namespace: infra
 spec:
-  storageClassName: 'standard'
+  storageClassName: gp2
   accessModes:
     - ReadWriteOnce
   resources:

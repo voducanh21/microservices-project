@@ -75,20 +75,6 @@ data:
           path: /tmp/tempo/blocks
 ---
 apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: tempo-pv
-  namespace: infra
-spec:
-  storageClassName: 'standard'
-  accessModes:
-    - ReadWriteOnce
-  capacity:
-    storage: 1Gi
-  hostPath:
-    path: /tmp/tempo
----
-apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: tempo-pvc
@@ -99,3 +85,4 @@ spec:
   resources:
     requests:
       storage: 1Gi
+  storageClassName: gp2
