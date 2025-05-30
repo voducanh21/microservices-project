@@ -4,6 +4,10 @@ pipeline {
     tools {
         maven 'Maven 3.9.6'
     }
+    
+    parameters {
+        string(name: 'commitMessage', defaultValue: '', description: 'Git commit message from webhook')
+    }
 
     environment {
         DOCKER_CRED_ID = "Dockerhub-cred"
@@ -16,6 +20,19 @@ pipeline {
         stage('Checkout') {
             steps {
                 git credentialsId: "${GIT_CRED_ID}", url: 'https://github.com/voducanh21/microservices-project.git', branch: 'master'
+            }
+        }
+        
+        stage('Skip Check') {
+            steps {
+                script {
+                    echo "🔎 Checking commit message: ${params.commitMessage}"
+                    if (params.commitMessage.contains("[skip-ci]")) {
+                        echo "🚫 Skipping build due to [skip-ci]"
+                        currentBuild.result = 'SUCCESS'
+                        exit 0
+                    }
+                }
             }
         }
 
