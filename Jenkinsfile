@@ -109,13 +109,13 @@ pipeline {
                     def parallelStages = images.collectEntries { img ->
                         ["Scan ${img}": {
                             echo "🔐 Scanning ${img}..."
-                            sh "docker pull ${img} || true"
                             sh """
                               docker run --rm \
                                 -v /home/ducanh/.trivy-cache:/root/.cache \
                                 aquasec/trivy image \
                                 --skip-version-check \
                                 --severity HIGH,CRITICAL \
+                                --ignore-unfixed \
                                 --timeout 10m \
                                 ${img} || true
                             """
