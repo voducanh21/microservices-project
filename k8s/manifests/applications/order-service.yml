@@ -17,7 +17,7 @@ spec:
         - name: order-service
           ports:
             - containerPort: 8081
-          image: ducanhvo/order-service:20250530113603
+          image: ducanhvo/order-service:20250530201148
           env:
             - name: SPRING_DATASOURCE_URL
               valueFrom:
