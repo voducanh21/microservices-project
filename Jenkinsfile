@@ -115,7 +115,7 @@ pipeline {
                                 aquasec/trivy image \
                                 --skip-version-check \
                                 --severity HIGH,CRITICAL \
-                                #--ignore-unfixed \
+                                --ignore-unfixed \
                                 --timeout 10m \
                                 ${img} || true
                             """
