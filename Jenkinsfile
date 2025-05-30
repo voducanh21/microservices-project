@@ -131,7 +131,9 @@ pipeline {
                                 -v /home/ducanh/.trivy-cache:/root/.cache \
                                 aquasec/trivy image \
                                 --skip-version-check \
+                                
                                 --severity HIGH,CRITICAL \
+                                --exit-code 0 \
                                 #--ignore-unfixed \
                                 --timeout 10m \
                                 ${img} || true
