@@ -5,10 +5,6 @@ pipeline {
         maven 'Maven 3.9.6'
     }
 
-    parameters {
-        string(name: 'commitMessage', defaultValue: '', description: 'Git commit message from webhook')
-    }
-
     environment {
         DOCKER_CRED_ID = "Dockerhub-cred"
         GIT_CRED_ID = "Github-cred"
@@ -26,11 +22,12 @@ pipeline {
         stage('Skip Check') {
             steps {
                 script {
-                    echo "🔎 Checking commit message: ${params.commitMessage}"
-                    if (params.commitMessage.contains("[skip-ci]")) {
+                    def commitMsg = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
+                    echo "🔎 Last commit message: ${commitMsg}"
+                    if (commitMsg.contains("[skip-ci]")) {
                         echo "🚫 Skipping build due to [skip-ci]"
                         currentBuild.result = 'SUCCESS'
-                        return
+                        error("Build stopped due to [skip-ci]")
                     }
                 }
             }
@@ -87,7 +84,6 @@ pipeline {
                             }
                         }
 
-                        // Update image tag in YAML
                         def yamlContent = readFile(file: yamlPath)
                         yamlContent = yamlContent.replaceAll(/image:\s+${svc.image}:.*/, "image: ${imageTag}")
                         writeFile file: yamlPath, text: yamlContent
