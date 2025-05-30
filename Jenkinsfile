@@ -30,7 +30,7 @@ pipeline {
                     if (params.commitMessage.contains("[skip-ci]")) {
                         echo "🚫 Skipping build due to [skip-ci]"
                         currentBuild.result = 'SUCCESS'
-                        exit 0
+                        return
                     }
                 }
             }
