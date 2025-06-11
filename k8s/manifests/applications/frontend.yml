@@ -17,7 +17,7 @@ spec:
         kubernetes.io/hostname: ip-10-0-102-5.ap-southeast-1.compute.internal
       containers:
         - name: frontend
-          image: ducanhvo/frontend:20250531012014
+          image: ducanhvo/frontend:20250611164631
           ports:
             - containerPort: 80
 ---

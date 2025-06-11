@@ -17,7 +17,7 @@ spec:
         - name: inventory-service
           ports:
             - containerPort: 8080
-          image: ducanhvo/inventory-service:20250531012014
+          image: ducanhvo/inventory-service:20250611164631
           env:
             - name: SPRING_DATASOURCE_URL
               valueFrom:
