@@ -51,7 +51,7 @@ pipeline {
             }
         }
 
-        stage('Build and Push All Services') {
+        stage('Build, Scan, and Push Services') {
             steps {
                 script {
                     def services = [
@@ -78,12 +78,23 @@ pipeline {
                             if (!svc.name.contains('frontend')) {
                                 sh 'mvn clean package -DskipTests'
                             }
+
+                            // 🔨 Build image
                             sh "docker build -t ${imageTag} ."
+
+                            // 🔍 Trivy Scan
+                            echo "🔐 Scanning image with Trivy: ${imageTag}"
+                            sh """
+                                trivy image --severity HIGH,CRITICAL --no-progress ${imageTag} || echo '⚠️ Trivy found vulnerabilities!'
+                            """
+
+                            // 🐳 Push image
                             withDockerRegistry([credentialsId: "${DOCKER_CRED_ID}", url: ""]) {
                                 sh "docker push ${imageTag}"
                             }
                         }
 
+                        // ✏️ Update manifest
                         def yamlContent = readFile(file: yamlPath)
                         yamlContent = yamlContent.replaceAll(/image:\s+${svc.image}:.*/, "image: ${imageTag}")
                         writeFile file: yamlPath, text: yamlContent
