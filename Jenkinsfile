@@ -82,7 +82,7 @@ pipeline {
                             // 🔨 Build image
                             sh "docker build -t ${imageTag} ."
 
-                            // 🔍 Trivy Scan
+                            // 🔍 Trivy Scan update
                             echo "🔐 Scanning image with Trivy: ${imageTag}"
                             sh """
                                 trivy image --severity HIGH,CRITICAL --no-progress ${imageTag} || echo '⚠️ Trivy found vulnerabilities!'
