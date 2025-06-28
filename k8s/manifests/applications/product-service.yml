@@ -17,7 +17,7 @@ spec:
         - name: product-service
           ports:
             - containerPort: 8080
-          image: ducanhvo/product-service:20250628170327
+          image: ducanhvo/product-service:20250628214823
           env:
             - name: SPRING_DATA_MONGODB_URI
               valueFrom:
