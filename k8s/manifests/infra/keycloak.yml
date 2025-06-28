@@ -14,7 +14,7 @@ spec:
         app: keycloak
     spec:
       nodeSelector:
-        kubernetes.io/hostname: ip-10-0-102-5.ap-southeast-1.compute.internal
+        kubernetes.io/hostname: ip-10-0-102-141.ap-southeast-1.compute.internal
       containers:
         - name: keycloak
           image: quay.io/keycloak/keycloak:24.0.1
