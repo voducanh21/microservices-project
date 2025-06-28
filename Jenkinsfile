@@ -82,7 +82,7 @@ pipeline {
                             // 🔨 Build image
                             sh "docker build -t ${imageTag} ."
 
-                            // 🔍 Trivy Scan update
+                            // 🔍 Trivy Scan
                             echo "🔐 Scanning image with Trivy: ${imageTag}"
                             sh """
                                 trivy image \
