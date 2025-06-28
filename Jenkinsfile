@@ -85,7 +85,13 @@ pipeline {
                             // 🔍 Trivy Scan update
                             echo "🔐 Scanning image with Trivy: ${imageTag}"
                             sh """
-                                trivy image --severity HIGH,CRITICAL --no-progress ${imageTag} || echo '⚠️ Trivy found vulnerabilities!'
+                                trivy image \
+                                  --skip-db-update \
+                                  --scanners vuln \
+                                  --severity HIGH,CRITICAL \
+                                  --no-progress \
+                                  ${imageTag} \
+                                  || echo '⚠️ Trivy found vulnerabilities!'
                             """
 
                             // 🐳 Push image
