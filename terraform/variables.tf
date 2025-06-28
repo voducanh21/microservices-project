@@ -1,11 +1,17 @@
 variable "region" {
-  default = "ap-southeast-1"
+  description = "AWS region to deploy resources"
+  type        = string
+  default     = "ap-southeast-1"
 }
 
 variable "profile" {
-  default = "default"
+  description = "AWS CLI named profile to use"
+  type        = string
+  default     = "default"
 }
 
 variable "cluster_name" {
-  default = "microservices-cluster"
+  description = "EKS cluster name"
+  type        = string
+  default     = "microservices-cluster"
 }

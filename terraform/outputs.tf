@@ -1,12 +1,15 @@
-output "cluster_endpoint" {
-  value = module.eks.cluster_endpoint
+output "cluster_name" {
+  description = "Name of the EKS cluster"
+  value       = module.eks.cluster_name
 }
 
-output "cluster_name" {
-  value = module.eks.cluster_name
+output "cluster_endpoint" {
+  description = "Endpoint of the EKS cluster"
+  value       = module.eks.cluster_endpoint
 }
 
 output "cluster_ca" {
-  value     = module.eks.cluster_certificate_authority_data
-  sensitive = true
+  description = "Certificate authority data of the EKS cluster"
+  value       = module.eks.cluster_ca
+  sensitive   = true
 }
