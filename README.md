@@ -1,112 +1,125 @@
-# Spring Boot Microservices
-This repository contains the latest source code of the spring-boot-microservices tutorial
+# Commerce Microservices Platform
 
-You can watch the tutorial on Youtube [here](https://youtu.be/yn_stY3HCr8?si=EjrBEUl0P-bzSWRG)
+A portfolio project demonstrating a service-based commerce backend with Spring Boot, an API gateway, OAuth2/JWT authentication, polyglot persistence, and Kubernetes/observability configuration.
 
-## Services Overview
+## Architecture
 
-- Product Service
-- Order Service
-- Inventory Service
-- Notification Service
-- API Gateway using Spring Cloud Gateway MVC
-- Shop Frontend using Angular 18
+```mermaid
+flowchart LR
+    User[Customer] --> Web[Angular 18 frontend]
+    Web -->|REST + bearer token| Gateway[Spring Cloud Gateway MVC :9000]
+    Identity[Keycloak / OIDC] -->|Sign in and issue JWT| Web
+    Identity -->|Issuer / public keys| Gateway
 
-## Tech Stack
+    Gateway -->|/api/product| Product[Product Service :8080]
+    Gateway -->|/api/order| Order[Order Service :8081]
+    Gateway -->|/api/inventory| Inventory[Inventory Service :8082]
 
-The technologies used in this project are:
+    Product --> Mongo[(MongoDB)]
+    Order -->|Check SKU and quantity| Inventory
+    Order --> MySQL[(MySQL)]
+    Inventory --> MySQL
 
-- Spring Boot
-- Angular
-- Mongo DB
-- MySQL
-- Kafka
-- Keycloak
-- Test Containers with Wiremock
-- Grafana Stack (Prometheus, Grafana, Loki and Tempo)
-- API Gateway using Spring Cloud Gateway MVC
-- Kubernetes
-
-
-## Application Architecture
-![image](https://github.com/user-attachments/assets/d4ef38bd-8ae5-4cc7-9ac5-7a8e5ec3c969)
-
-## How to run the frontend application
-
-Make sure you have the following installed on your machine:
-
-- Node.js
-- NPM
-- Angular CLI
-
-Run the following commands to start the frontend application
-
-```shell
-cd frontend
-npm install
-npm run start
-```
-## How to build the backend services
-
-Run the following command to build and package the backend services into a docker container
-
-```shell
-mvn spring-boot:build-image -DdockerPassword=<your-docker-account-password>
+    Product -. logs .-> Loki[Loki]
+    Order -. logs .-> Loki
+    Inventory -. logs .-> Loki
+    Gateway -. logs .-> Loki
+    Product -. metrics .-> Prometheus[Prometheus]
+    Order -. metrics .-> Prometheus
+    Inventory -. metrics .-> Prometheus
+    Gateway -. metrics .-> Prometheus
+    Prometheus --> Grafana[Grafana]
+    Product -. traces .-> Tempo[Tempo]
+    Order -. traces .-> Tempo
+    Inventory -. traces .-> Tempo
+    Gateway -. traces .-> Tempo
 ```
 
-The above command will build and package the services into a docker container and push it to your docker hub account.
+An order request checks stock through the Inventory Service before the Order Service persists the order. The gateway validates JWTs issued by Keycloak and routes requests to the backend services. Springdoc exposes OpenAPI documentation for the services and an aggregated Swagger UI through the gateway.
 
-## How to run the backend services
+## Services
 
-Make sure you have the following installed on your machine:
+| Component | Responsibility | Local port |
+| --- | --- | ---: |
+| Angular shop frontend | Product browsing and order submission UI | `4200` |
+| API Gateway | Routes `/api/*` requests, validates JWTs, aggregates API docs, and applies resilience policies | `9000` |
+| Product Service | Product API and catalog persistence | `8080` |
+| Order Service | Validates stock with Inventory and stores orders | `8081` |
+| Inventory Service | Answers SKU availability checks | `8082` |
+| Keycloak | OIDC identity provider and JWT issuer | `8181` in Compose |
 
-- Java 21
-- Docker
-- Kind Cluster - https://kind.sigs.k8s.io/docs/user/quick-start/#installation
+The Product Service uses MongoDB. Order and Inventory share the MySQL server while keeping separate databases. Loki, Prometheus, Grafana, and Tempo provide centralized logs, metrics, dashboards, and traces.
 
-### Start Kind Cluster
-    
-Run the k8s/kind/create-kind-cluster.sh script to create the kind Kubernetes cluster
+## Technology
 
-```shell
-./k8s/kind/create-kind-cluster.sh
-```
-This will create a kind cluster and pre-load all the required docker images into the cluster, this will save you time downloading the images when you deploy the application.
+- **Backend:** Java 21, Spring Boot 3, Spring Cloud Gateway MVC, Spring Security OAuth2 Resource Server, Resilience4j, Springdoc OpenAPI
+- **Frontend:** Angular 18, TypeScript
+- **Data:** MongoDB, MySQL, Flyway
+- **Identity:** Keycloak, OpenID Connect, JWT
+- **Platform & delivery:** Docker, Docker Compose, Kubernetes (Kind manifests), Argo CD, Jenkins, SonarQube, Trivy
+- **Observability:** Spring Boot Actuator, Micrometer/Prometheus, Loki, Grafana, Tempo
 
-### Deploy the infrastructure
+## Quick Start
 
-Run the k8s/manisfests/infrastructure.yaml file to deploy the infrastructure
+### Prerequisites
 
-```shell
-kubectl apply -f k8s/manifests/infrastructure.yaml
-```
+- Java 21 and Maven
+- Docker with the Compose plugin
+- Node.js and npm
 
-### Deploy the services
+### 1. Start local databases and observability services
 
-Run the k8s/manifests/applications.yaml file to deploy the services
+From the repository root:
 
-```shell
-kubectl apply -f k8s/manifests/applications.yaml
-```
-
-### Access the API Gateway
-
-To access the API Gateway, you need to port-forward the gateway service to your local machine
-
-```shell
-kubectl port-forward svc/gateway-service 9000:9000
+```bash
+docker compose up -d mongodb mysql loki prometheus tempo
 ```
 
-### Access the Keycloak Admin Console
-To access the Keycloak admin console, you need to port-forward the keycloak service to your local machine
+The Compose file provides supporting infrastructure; it does **not** start the application services.
 
-```shell
-kubectl port-forward svc/keycloak 8080:8080
+### 2. Start the backend
+
+Run each command in a separate terminal from the repository root:
+
+```bash
+mvn -pl product-service spring-boot:run
+mvn -pl inventory-service spring-boot:run
+mvn -pl order-service spring-boot:run
+mvn -pl api-gateway spring-boot:run
 ```
 
-### Access the Grafana Dashboards
-To access the Grafana dashboards, you need to port-forward the grafana service to your local machine
+The services use the local database settings in their `application.properties` files. These settings are for isolated development only; do not reuse the demo credentials in a shared or production environment.
 
-```shell
-kubectl port-forward svc/grafana 3000:3000
+### 3. Start the frontend
+
+```bash
+cd microservices-shop-frontend
+npm ci
+npm start
 ```
+
+Open `http://localhost:4200`. The aggregated API documentation is configured at `http://localhost:9000/swagger-ui.html`.
+
+### Local setup notes
+
+- The frontend currently points its API and Keycloak URLs to the hosted shop domain. For a local end-to-end browser flow, configure these URLs for the local gateway and identity provider.
+- Compose maps Keycloak to port `8181`, while the gateway's default issuer URL uses port `8080`; the Keycloak Compose database host also needs to match the `keycloak-mysql` service. Align these settings before testing local JWT authentication.
+- Grafana in the supplied development configuration has anonymous Admin access. Keep the monitoring stack on a trusted local machine; do not expose it publicly as configured.
+
+## API examples
+
+```bash
+# List products
+curl http://localhost:8080/api/product
+
+# Check stock
+curl "http://localhost:8082/api/inventory?skuCode=SKU-001&quantity=1"
+```
+
+The gateway exposes the corresponding service routes under `/api/product`, `/api/order`, and `/api/inventory`. Protected gateway requests require a valid Keycloak JWT.
+
+## Deployment and project scope
+
+Kubernetes manifests are under `k8s/manifests/`; Kind helper scripts are under `k8s/kind/`. `Jenkinsfile` describes the CI pipeline. Review image tags, secrets, and environment-specific URLs before applying the manifests to a cluster.
+
+This checkout currently contains the Gateway, Product, Order, and Inventory backend modules. Kafka event publishing is commented out in the Order Service, and a Notification Service is not present as a Maven module. Test dependencies are included, but backend test source files are not currently present.
